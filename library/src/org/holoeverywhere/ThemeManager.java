@@ -2,26 +2,51 @@
 package org.holoeverywhere;
 
 import static org.holoeverywhere.R.style.Holo_Theme;
+import static org.holoeverywhere.R.style.Holo_Theme_Dialog;
+import static org.holoeverywhere.R.style.Holo_Theme_DialogWhenLarge;
+import static org.holoeverywhere.R.style.Holo_Theme_DialogWhenLarge_Light;
+import static org.holoeverywhere.R.style.Holo_Theme_DialogWhenLarge_Light_DarkActionBar;
+import static org.holoeverywhere.R.style.Holo_Theme_DialogWhenLarge_Light_DarkActionBar_NoActionBar;
+import static org.holoeverywhere.R.style.Holo_Theme_DialogWhenLarge_Light_NoActionBar;
+import static org.holoeverywhere.R.style.Holo_Theme_DialogWhenLarge_NoActionBar;
+import static org.holoeverywhere.R.style.Holo_Theme_Dialog_Light;
 import static org.holoeverywhere.R.style.Holo_Theme_Fullscreen;
+import static org.holoeverywhere.R.style.Holo_Theme_Fullscreen_Wallpaper;
 import static org.holoeverywhere.R.style.Holo_Theme_Light;
 import static org.holoeverywhere.R.style.Holo_Theme_Light_DarkActionBar;
 import static org.holoeverywhere.R.style.Holo_Theme_Light_DarkActionBar_Fullscreen;
+import static org.holoeverywhere.R.style.Holo_Theme_Light_DarkActionBar_Fullscreen_Wallpaper;
 import static org.holoeverywhere.R.style.Holo_Theme_Light_DarkActionBar_NoActionBar;
 import static org.holoeverywhere.R.style.Holo_Theme_Light_DarkActionBar_NoActionBar_Fullscreen;
+import static org.holoeverywhere.R.style.Holo_Theme_Light_DarkActionBar_NoActionBar_Fullscreen_Wallpaper;
+import static org.holoeverywhere.R.style.Holo_Theme_Light_DarkActionBar_NoActionBar_Wallpaper;
+import static org.holoeverywhere.R.style.Holo_Theme_Light_DarkActionBar_Wallpaper;
 import static org.holoeverywhere.R.style.Holo_Theme_Light_Fullscreen;
+import static org.holoeverywhere.R.style.Holo_Theme_Light_Fullscreen_Wallpaper;
 import static org.holoeverywhere.R.style.Holo_Theme_Light_NoActionBar;
 import static org.holoeverywhere.R.style.Holo_Theme_Light_NoActionBar_Fullscreen;
+import static org.holoeverywhere.R.style.Holo_Theme_Light_NoActionBar_Fullscreen_Wallpaper;
+import static org.holoeverywhere.R.style.Holo_Theme_Light_NoActionBar_Wallpaper;
+import static org.holoeverywhere.R.style.Holo_Theme_Light_Wallpaper;
 import static org.holoeverywhere.R.style.Holo_Theme_NoActionBar;
 import static org.holoeverywhere.R.style.Holo_Theme_NoActionBar_Fullscreen;
+import static org.holoeverywhere.R.style.Holo_Theme_NoActionBar_Fullscreen_Wallpaper;
+import static org.holoeverywhere.R.style.Holo_Theme_NoActionBar_Wallpaper;
+import static org.holoeverywhere.R.style.Holo_Theme_Wallpaper;
 
-import org.holoeverywhere.ThemeManager.ThemeGetter;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.holoeverywhere.ThemeManager.ThemeGetter.ThemeTag;
+import org.holoeverywhere.app.Activity;
 import org.holoeverywhere.app.Application;
+import org.holoeverywhere.app.ContextThemeWrapperPlus;
+import org.holoeverywhere.preference.PreferenceManagerHelper;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
 import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.util.SparseIntArray;
@@ -62,6 +87,51 @@ import android.util.SparseIntArray;
  * <td>{@link R.style#Holo_Theme_Light_NoActionBar_Fullscreen}</td>
  * <td>{@link R.style#Holo_Theme_Light_DarkActionBar_NoActionBar_Fullscreen}</td>
  * </tr>
+ * <tr>
+ * <td>{@link #WALLPAPER}</td>
+ * <td>{@link R.style#Holo_Theme_Wallpaper}</td>
+ * <td>{@link R.style#Holo_Theme_Light_Wallpaper}</td>
+ * <td>{@link R.style#Holo_Theme_Light_DarkActionBar_Wallpaper}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link #WALLPAPER} | {@link #FULLSCREEN}</td>
+ * <td>{@link R.style#Holo_Theme_Fullscreen_Wallpaper}</td>
+ * <td>{@link R.style#Holo_Theme_Light_Fullscreen_Wallpaper}</td>
+ * <td>{@link R.style#Holo_Theme_Light_DarkActionBar_Fullscreen_Wallpaper}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link #WALLPAPER} | {@link #NO_ACTION_BAR}</td>
+ * <td>{@link R.style#Holo_Theme_NoActionBar_Wallpaper}</td>
+ * <td>{@link R.style#Holo_Theme_Light_NoActionBar_Wallpaper}</td>
+ * <td>{@link R.style#Holo_Theme_Light_DarkActionBar_NoActionBar_Wallpaper}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link #WALLPAPER} | {@link #NO_ACTION_BAR} | {@link #FULLSCREEN}</td>
+ * <td>{@link R.style#Holo_Theme_NoActionBar_Fullscreen_Wallpaper}</td>
+ * <td>{@link R.style#Holo_Theme_Light_NoActionBar_Fullscreen_Wallpaper}</td>
+ * <td>
+ * {@link R.style#Holo_Theme_Light_DarkActionBar_NoActionBar_Fullscreen_Wallpaper}
+ * </td>
+ * </tr>
+ * <tr>
+ * <td>{@link #DIALOG}</td>
+ * <td>{@link R.style#Holo_Theme_Dialog}</td>
+ * <td>{@link R.style#Holo_Theme_Dialog_Light}</td>
+ * <td>{@link R.style#Holo_Theme_Dialog_Light}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link #DIALOG_WHEN_LARGE}</td>
+ * <td>{@link R.style#Holo_Theme_DialogWhenLarge}</td>
+ * <td>{@link R.style#Holo_Theme_DialogWhenLarge_Light}</td>
+ * <td>{@link R.style#Holo_Theme_DialogWhenLarge_Light_DarkActionBar}</td>
+ * </tr>
+ * <tr>
+ * <td>{@link #DIALOG_WHEN_LARGE} | {@link #NO_ACTION_BAR}</td>
+ * <td>{@link R.style#Holo_Theme_DialogWhenLarge_NoActionBar}</td>
+ * <td>{@link R.style#Holo_Theme_DialogWhenLarge_Light_NoActionBar}</td>
+ * <td>
+ * {@link R.style#Holo_Theme_DialogWhenLarge_Light_DarkActionBar_NoActionBar}</td>
+ * </tr>
  * </table>
  * <br />
  * You may remap themes for certain flags with method {@link #map(int, int)}
@@ -81,20 +151,20 @@ public final class ThemeManager {
     }
 
     /**
-     * Theme getter. This class should return theme resource for specify
-     * {@link ThemeGetter.ThemeTag} object. If under the right ThemeTag no have
-     * theme, return a negative number or zero. <br />
+     * Theme getter. This class should return theme resource for set of flags.
+     * If under the right ThemeTag no have theme, return a negative number or
+     * zero. <br />
      * <br />
      * Example:
      * 
      * <pre>
      * ThemeGetter getter = new ThemeGetter() {
-     * 	public int getThemeResource(ThemeTag themeTag) {
-     * 		if(themeTag.fullscreen) { // theme has {@link ThemeManager#FULLSCREEN} flag
-     * 			return R.style.CustomThemeWithFullscreenFlag;
-     * 		}
-     * 		return 0; // default behavior
-     * 	}
+     *   public int getThemeResource(ThemeTag themeTag) {
+     *     if(themeTag.fullscreen) { // theme has {@link ThemeManager#FULLSCREEN} flag
+     *       return R.style.CustomThemeWithFullscreenFlag;
+     *     }
+     *     return 0; // default behavior
+     *   }
      * }
      * </pre>
      */
@@ -103,7 +173,8 @@ public final class ThemeManager {
          * Class-container for theme flags.
          */
         public static final class ThemeTag {
-            public final boolean dark, fullscreen, light, mixed, noActionBar;
+            public final boolean dark, fullscreen, light, mixed, noActionBar, wallpaper, dialog,
+                    dialogWhenLarge;
             public final int flags;
 
             private ThemeTag(int flags) {
@@ -113,72 +184,100 @@ public final class ThemeManager {
                 mixed = isMixed(flags);
                 noActionBar = isNoActionBar(flags);
                 fullscreen = isFullScreen(flags);
+                wallpaper = isWallpaper(flags);
+                dialog = isDialog(flags);
+                dialogWhenLarge = isDialogWhenLarge(flags);
             }
         }
 
         public int getThemeResource(ThemeTag themeTag);
     }
 
-    private static int _DEFAULT_THEME = ThemeManager.DARK;
-    private static final int _START_RESOURCES_ID = 0x01000000;
+    public static interface ThemeSetter {
+        public void setupThemes();
+    }
+
+    private static int _DEFAULT_THEME;
+    public static final int _START_RESOURCES_ID = 0x01000000;
     private static ThemeGetter _THEME_GETTER;
-    private static final int _THEME_MASK = ThemeManager.DARK
-            | ThemeManager.LIGHT | ThemeManager.MIXED
-            | ThemeManager.NO_ACTION_BAR | ThemeManager.FULLSCREEN;
+    private static int _THEME_MASK = 0;
     private static int _THEME_MODIFIER = 0;
-    private static final String _THEME_TAG = "holoeverywhere:theme";
+    private static final String _THEME_TAG = ":holoeverywhere:theme";
     private static final SparseIntArray _THEMES_MAP = new SparseIntArray();
+
+    public static final int COLOR_SCHEME_MASK;
     /**
      * Flag indicates on the dark theme
      */
-    public static final int DARK = 1;
+    public static final int DARK;
+    /**
+     * Flag indicates on the dialog theme.
+     */
+    public static final int DIALOG;
+    /**
+     * Flag indicates on the dialog-when-large theme.
+     */
+    public static final int DIALOG_WHEN_LARGE;
     /**
      * Flag indicates on the fullscreen theme
      */
-    public static final int FULLSCREEN = 16;
+    public static final int FULLSCREEN;
+    /**
+     * Invalid theme
+     */
+    public static final int INVALID = 0;
+    /**
+     * Boolean flag indicates that activity was be created by theme manager
+     */
+    public static final String KEY_CREATED_BY_THEME_MANAGER = ":holoeverywhere:createbythememanager";
+    /**
+     * Key for saving activity instance state. Only for system use
+     */
+    public static final String KEY_INSTANCE_STATE = ":holoeverywhere:instancestate";
     /**
      * Flag indicates on the light theme. If you want light theme with dark
      * action bar, use {@link #MIXED} flag
      */
-    public static final int LIGHT = 2;
+    public static final int LIGHT;
     /**
      * Flag indicates on the light theme with dark action bar
      */
-    public static final int MIXED = 4;
-    /**
-     * Flag indicates on the theme without action bar by default (may be show
-     * later)
-     */
-    public static final int NO_ACTION_BAR = 8;
+    public static final int MIXED;
+
+    private static int NEXT_OFFSET = 0;
 
     /**
-     * Map default themes
+     * Flag indicates on the theme without action bar
      */
+    public static final int NO_ACTION_BAR;
+
+    private static List<ThemeSetter> sThemeSetters;
+
+    /**
+     * Flag indicates on the theme with wallpaper background
+     */
+    public static final int WALLPAPER;
+
     static {
-        map(DARK, Holo_Theme);
-        map(DARK | FULLSCREEN, Holo_Theme_Fullscreen);
-        map(DARK | NO_ACTION_BAR, Holo_Theme_NoActionBar);
-        map(DARK | NO_ACTION_BAR | FULLSCREEN,
-                Holo_Theme_NoActionBar_Fullscreen);
-        map(LIGHT, Holo_Theme_Light);
-        map(LIGHT | FULLSCREEN, Holo_Theme_Light_Fullscreen);
-        map(LIGHT | NO_ACTION_BAR, Holo_Theme_Light_NoActionBar);
-        map(LIGHT | NO_ACTION_BAR | FULLSCREEN,
-                Holo_Theme_Light_NoActionBar_Fullscreen);
-        map(MIXED, Holo_Theme_Light_DarkActionBar);
-        map(MIXED | FULLSCREEN, Holo_Theme_Light_DarkActionBar_Fullscreen);
-        map(MIXED | NO_ACTION_BAR, Holo_Theme_Light_DarkActionBar_NoActionBar);
-        map(MIXED | NO_ACTION_BAR | FULLSCREEN,
-                Holo_Theme_Light_DarkActionBar_NoActionBar_Fullscreen);
+        DARK = makeNewFlag();
+        LIGHT = makeNewFlag();
+        MIXED = DARK | LIGHT;
+        FULLSCREEN = makeNewFlag();
+        NO_ACTION_BAR = makeNewFlag();
+        WALLPAPER = makeNewFlag();
+        DIALOG = makeNewFlag();
+        DIALOG_WHEN_LARGE = makeNewFlag();
+
+        COLOR_SCHEME_MASK = DARK | LIGHT | MIXED;
+
+        reset();
     }
 
     /**
      * Apply theme from intent. Only system use, don't call it!
      */
     public static void applyTheme(Activity activity) {
-        boolean force = activity instanceof IHoloActivity ? ((IHoloActivity) activity)
-                .isForceThemeApply() : false;
-        ThemeManager.applyTheme(activity, force);
+        ThemeManager.applyTheme(activity, false);
     }
 
     /**
@@ -218,6 +317,17 @@ public final class ThemeManager {
         }
     }
 
+    public static Context context(Context context, int theme) {
+        return context(context, theme, true);
+    }
+
+    public static Context context(Context context, int theme, boolean applyModifier) {
+        while (context instanceof ContextThemeWrapperPlus) {
+            context = ((ContextThemeWrapperPlus) context).getBaseContext();
+        }
+        return new ContextThemeWrapperPlus(context, getThemeResource(theme, applyModifier));
+    }
+
     /**
      * @return Default theme, which will be using if theme not specified for
      *         intent
@@ -249,8 +359,19 @@ public final class ThemeManager {
      * Extract theme flags from intent
      */
     public static int getTheme(Intent intent) {
+        return getTheme(intent, true);
+    }
+
+    /**
+     * Extract theme flags from intent
+     */
+    public static int getTheme(Intent intent, boolean applyModifier) {
         return prepareFlags(intent.getIntExtra(ThemeManager._THEME_TAG,
-                ThemeManager._DEFAULT_THEME));
+                ThemeManager._DEFAULT_THEME), applyModifier);
+    }
+
+    public static int getThemeMask() {
+        return _THEME_MASK;
     }
 
     /**
@@ -264,7 +385,14 @@ public final class ThemeManager {
      * Resolve theme resource id by flags
      */
     public static int getThemeResource(int themeTag) {
-        themeTag = prepareFlags(themeTag);
+        return getThemeResource(themeTag, true);
+    }
+
+    /**
+     * Resolve theme resource id by flags
+     */
+    public static int getThemeResource(int themeTag, boolean applyModifier) {
+        themeTag = prepareFlags(themeTag, applyModifier);
         if (themeTag >= _START_RESOURCES_ID) {
             return themeTag;
         }
@@ -275,8 +403,8 @@ public final class ThemeManager {
                 return getterResource;
             }
         }
-        final int i = _THEMES_MAP.get(themeTag, _DEFAULT_THEME);
-        if (i == _DEFAULT_THEME) {
+        final int i = _THEMES_MAP.get(themeTag, -1);
+        if (i == -1) {
             return _THEMES_MAP.get(_DEFAULT_THEME, R.style.Holo_Theme);
         } else {
             return i;
@@ -288,6 +416,27 @@ public final class ThemeManager {
      */
     public static int getThemeResource(Intent intent) {
         return getThemeResource(getTheme(intent));
+    }
+
+    public static int getThemeType(Context context) {
+        TypedArray a = context.obtainStyledAttributes(new int[] {
+                R.attr.holoTheme
+        });
+        final int holoTheme = a.getInt(0, 0);
+        a.recycle();
+        switch (holoTheme) {
+            case 1:
+                return DARK;
+            case 2:
+                return LIGHT;
+            case 3:
+                return MIXED;
+            case 4:
+                return PreferenceManagerHelper.obtainThemeTag();
+            case 0:
+            default:
+                return INVALID;
+        }
     }
 
     /**
@@ -307,7 +456,7 @@ public final class ThemeManager {
     }
 
     private static boolean is(int config, int key) {
-        return (config & key) != 0;
+        return (config & key) == key;
     }
 
     public static boolean isDark(Activity activity) {
@@ -320,6 +469,30 @@ public final class ThemeManager {
 
     public static boolean isDark(Intent intent) {
         return ThemeManager.isDark(ThemeManager.getTheme(intent));
+    }
+
+    public static boolean isDialog(Activity activity) {
+        return ThemeManager.isDialog(ThemeManager.getTheme(activity));
+    }
+
+    public static boolean isDialog(int i) {
+        return ThemeManager.is(i, ThemeManager.DIALOG);
+    }
+
+    public static boolean isDialog(Intent intent) {
+        return ThemeManager.isDialog(ThemeManager.getTheme(intent));
+    }
+
+    public static boolean isDialogWhenLarge(Activity activity) {
+        return ThemeManager.isDialog(ThemeManager.getTheme(activity));
+    }
+
+    public static boolean isDialogWhenLarge(int i) {
+        return ThemeManager.is(i, ThemeManager.DIALOG_WHEN_LARGE);
+    }
+
+    public static boolean isDialogWhenLarge(Intent intent) {
+        return ThemeManager.isDialog(ThemeManager.getTheme(intent));
     }
 
     public static boolean isFullScreen(Activity activity) {
@@ -370,6 +543,31 @@ public final class ThemeManager {
         return ThemeManager.isNoActionBar(ThemeManager.getTheme(intent));
     }
 
+    public static boolean isWallpaper(Activity activity) {
+        return ThemeManager.isWallpaper(ThemeManager.getTheme(activity));
+    }
+
+    public static boolean isWallpaper(int i) {
+        return ThemeManager.is(i, ThemeManager.WALLPAPER);
+    }
+
+    public static boolean isWallpaper(Intent intent) {
+        return ThemeManager.isWallpaper(ThemeManager.getTheme(intent));
+    }
+
+    /**
+     * Generate flag for using it in ThemeManager. Not more than 24 flags can be
+     * created.
+     */
+    public static int makeNewFlag() {
+        if (NEXT_OFFSET >= 24) {
+            throw new IllegalStateException();
+        }
+        final int flag = 1 << NEXT_OFFSET++;
+        _THEME_MASK |= flag;
+        return flag;
+    }
+
     /**
      * Remap default theme.
      * 
@@ -388,9 +586,18 @@ public final class ThemeManager {
      * <pre>
      * ThemeManager.map({@link #LIGHT}, {@link R.style#Holo_Theme_Dialog_Light});
      * </pre>
+     * 
+     * If theme value negative - remove pair flags-theme
      */
     public static void map(int flags, int theme) {
-        _THEMES_MAP.put(flags & _THEME_MASK, theme);
+        if (theme > 0) {
+            _THEMES_MAP.put(flags & _THEME_MASK, theme);
+        } else {
+            final int i = _THEMES_MAP.indexOfKey(flags & _THEME_MASK);
+            if (i > 0) {
+                _THEMES_MAP.removeAt(i);
+            }
+        }
     }
 
     /**
@@ -454,14 +661,136 @@ public final class ThemeManager {
         ThemeManager._DEFAULT_THEME ^= mod;
     }
 
-    private static int prepareFlags(int i) {
+    private static int prepareFlags(int i, boolean applyModifier) {
         if (i >= _START_RESOURCES_ID) {
             return i;
         }
-        if (ThemeManager._THEME_MODIFIER > 0) {
+        if (applyModifier && ThemeManager._THEME_MODIFIER > 0) {
             i |= ThemeManager._THEME_MODIFIER;
         }
         return i & ThemeManager._THEME_MASK;
+    }
+
+    public static void registerThemeSetter(ThemeSetter themeSetter) {
+        if (themeSetter == null) {
+            return;
+        }
+        if (sThemeSetters == null) {
+            sThemeSetters = new ArrayList<ThemeManager.ThemeSetter>();
+        }
+        if (!sThemeSetters.contains(themeSetter)) {
+            sThemeSetters.add(themeSetter);
+            themeSetter.setupThemes();
+        }
+    }
+
+    /**
+     * Remove theme from the intent extras.
+     */
+    public static void removeTheme(Activity activity) {
+        activity.getIntent().removeExtra(_THEME_TAG);
+    }
+
+    /**
+     * Reset all themes to default
+     */
+    public static void reset() {
+        if ((_DEFAULT_THEME & COLOR_SCHEME_MASK) == 0) {
+            _DEFAULT_THEME = DARK;
+        }
+        _THEME_MODIFIER = 0;
+        _THEMES_MAP.clear();
+
+        map(DARK,
+                Holo_Theme);
+        map(DARK | FULLSCREEN,
+                Holo_Theme_Fullscreen);
+        map(DARK | NO_ACTION_BAR,
+                Holo_Theme_NoActionBar);
+        map(DARK | NO_ACTION_BAR | FULLSCREEN,
+                Holo_Theme_NoActionBar_Fullscreen);
+        map(DARK | DIALOG,
+                Holo_Theme_Dialog);
+        map(DARK | DIALOG_WHEN_LARGE,
+                Holo_Theme_DialogWhenLarge);
+        map(DARK | DIALOG_WHEN_LARGE | NO_ACTION_BAR,
+                Holo_Theme_DialogWhenLarge_NoActionBar);
+
+        map(DARK | WALLPAPER,
+                Holo_Theme_Wallpaper);
+        map(DARK | NO_ACTION_BAR | WALLPAPER,
+                Holo_Theme_NoActionBar_Wallpaper);
+        map(DARK | FULLSCREEN | WALLPAPER,
+                Holo_Theme_Fullscreen_Wallpaper);
+        map(DARK | NO_ACTION_BAR | FULLSCREEN | WALLPAPER,
+                Holo_Theme_NoActionBar_Fullscreen_Wallpaper);
+
+        map(LIGHT,
+                Holo_Theme_Light);
+        map(LIGHT | FULLSCREEN,
+                Holo_Theme_Light_Fullscreen);
+        map(LIGHT | NO_ACTION_BAR,
+                Holo_Theme_Light_NoActionBar);
+        map(LIGHT | NO_ACTION_BAR | FULLSCREEN,
+                Holo_Theme_Light_NoActionBar_Fullscreen);
+        map(LIGHT | DIALOG,
+                Holo_Theme_Dialog_Light);
+        map(LIGHT | DIALOG_WHEN_LARGE,
+                Holo_Theme_DialogWhenLarge_Light);
+        map(LIGHT | DIALOG_WHEN_LARGE | NO_ACTION_BAR,
+                Holo_Theme_DialogWhenLarge_Light_NoActionBar);
+
+        map(LIGHT | WALLPAPER,
+                Holo_Theme_Light_Wallpaper);
+        map(LIGHT | NO_ACTION_BAR | WALLPAPER,
+                Holo_Theme_Light_NoActionBar_Wallpaper);
+        map(LIGHT | FULLSCREEN | WALLPAPER,
+                Holo_Theme_Light_Fullscreen_Wallpaper);
+        map(LIGHT | NO_ACTION_BAR | FULLSCREEN | WALLPAPER,
+                Holo_Theme_Light_NoActionBar_Fullscreen_Wallpaper);
+
+        map(MIXED,
+                Holo_Theme_Light_DarkActionBar);
+        map(MIXED | FULLSCREEN,
+                Holo_Theme_Light_DarkActionBar_Fullscreen);
+        map(MIXED | NO_ACTION_BAR,
+                Holo_Theme_Light_DarkActionBar_NoActionBar);
+        map(MIXED | NO_ACTION_BAR | FULLSCREEN,
+                Holo_Theme_Light_DarkActionBar_NoActionBar_Fullscreen);
+        map(MIXED | DIALOG,
+                Holo_Theme_Dialog_Light);
+        map(MIXED | DIALOG_WHEN_LARGE,
+                Holo_Theme_DialogWhenLarge_Light_DarkActionBar);
+        map(MIXED | DIALOG_WHEN_LARGE | NO_ACTION_BAR,
+                Holo_Theme_DialogWhenLarge_Light_DarkActionBar_NoActionBar);
+
+        map(MIXED | WALLPAPER,
+                Holo_Theme_Light_DarkActionBar_Wallpaper);
+        map(MIXED | NO_ACTION_BAR | WALLPAPER,
+                Holo_Theme_Light_DarkActionBar_NoActionBar_Wallpaper);
+        map(MIXED | FULLSCREEN | WALLPAPER,
+                Holo_Theme_Light_DarkActionBar_Fullscreen_Wallpaper);
+        map(MIXED | NO_ACTION_BAR | FULLSCREEN | WALLPAPER,
+                Holo_Theme_Light_DarkActionBar_NoActionBar_Fullscreen_Wallpaper);
+
+        if (sThemeSetters != null) {
+            for (ThemeSetter setter : sThemeSetters) {
+                setter.setupThemes();
+            }
+        }
+    }
+
+    /**
+     * Simply restart activity
+     * 
+     * @param activity Activity
+     */
+    public static void restart(Activity activity) {
+        restart(activity, true);
+    }
+
+    public static void restart(Activity activity, boolean force) {
+        restartWithTheme(activity, -1, force);
     }
 
     /**
@@ -510,9 +839,9 @@ public final class ThemeManager {
      * @param theme Theme flags for check
      * @param force Force restart activity
      */
-    public static void restartWithTheme(Activity activity, int theme,
-            boolean force) {
-        if (theme < _START_RESOURCES_ID) {
+    @SuppressLint("InlinedApi")
+    public static void restartWithTheme(Activity activity, int theme, boolean force) {
+        if (theme < _START_RESOURCES_ID && theme > 0) {
             if (ThemeManager._THEME_MODIFIER > 0) {
                 theme |= ThemeManager._THEME_MODIFIER;
             }
@@ -521,7 +850,13 @@ public final class ThemeManager {
         if (force || ThemeManager.getTheme(activity) != theme) {
             Intent intent = new Intent(activity.getIntent());
             intent.setClass(activity, activity.getClass());
-            intent.putExtra(ThemeManager._THEME_TAG, theme);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            if (theme > 0) {
+                intent.putExtra(ThemeManager._THEME_TAG, theme);
+            }
+            intent.putExtra(KEY_INSTANCE_STATE, activity.saveInstanceState());
+            intent.putExtra(KEY_CREATED_BY_THEME_MANAGER, true);
             if (activity.isRestricted()) {
                 Application app = Application.getLastInstance();
                 if (app != null && !app.isRestricted()) {
@@ -531,6 +866,7 @@ public final class ThemeManager {
             } else {
                 if (!activity.isFinishing()) {
                     activity.finish();
+                    activity.overridePendingTransition(0, 0);
                 }
                 if (activity instanceof SuperStartActivity) {
                     ((SuperStartActivity) activity).superStartActivity(intent,
@@ -630,6 +966,13 @@ public final class ThemeManager {
                 }
             }
         }
+    }
+
+    public static void unregisterThemeSetter(ThemeSetter themeSetter) {
+        if (sThemeSetters == null || themeSetter == null) {
+            return;
+        }
+        sThemeSetters.remove(themeSetter);
     }
 
     private ThemeManager() {

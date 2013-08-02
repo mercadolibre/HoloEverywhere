@@ -86,10 +86,12 @@ public class DatePicker extends FrameLayout {
     private static class SavedState extends BaseSavedState {
         @SuppressWarnings("all")
         public static final Creator<SavedState> CREATOR = new Creator<SavedState>() {
+            @Override
             public SavedState createFromParcel(Parcel in) {
                 return new SavedState(in);
             }
 
+            @Override
             public SavedState[] newArray(int size) {
                 return new SavedState[size];
             }
@@ -181,8 +183,7 @@ public class DatePicker extends FrameLayout {
         int endYear = a.getInt(R.styleable.DatePicker_endYear, 2100);
         String minDate = a.getString(R.styleable.DatePicker_minDate);
         String maxDate = a.getString(R.styleable.DatePicker_maxDate);
-        int layoutResourceId = a.getResourceId(
-                R.styleable.DatePicker_internalLayout,
+        int layoutResourceId = a.getResourceId(R.styleable.DatePicker_layout,
                 R.layout.date_picker_holo);
         a.recycle();
         inputMethodManager = (InputMethodManager) context
@@ -229,9 +230,7 @@ public class DatePicker extends FrameLayout {
         currentDate.setTimeInMillis(System.currentTimeMillis());
         init(currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH),
                 currentDate.get(Calendar.DAY_OF_MONTH), null);
-        // TODO
-        // Reordering a spinners leads them stop, temporarily disabled.
-        // reorderSpinners();
+        reorderSpinners();
     }
 
     private void checkInputState(NumberPicker... spinners) {
@@ -373,7 +372,6 @@ public class DatePicker extends FrameLayout {
         }
     }
 
-    @SuppressWarnings("unused")
     private void reorderSpinners() {
         char[] order = DateFormat.getDateFormatOrder(getContext());
         final int spinnerCount = order.length;

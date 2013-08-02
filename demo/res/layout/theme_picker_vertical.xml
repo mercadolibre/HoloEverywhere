@@ -4,8 +4,8 @@
 	android:layout_width="match_parent"
 	android:layout_height="wrap_content"
 	android:orientation="vertical"
-	holo:divider="?dividerHorizontal"
-	holo:showDividers="middle|beginning" >
+	android:divider="?dividerHorizontal"
+	android:showDividers="middle|beginning" >
 	<DemoListRowView
 		android:id="@+id/dark"
 		android:layout_width="match_parent"

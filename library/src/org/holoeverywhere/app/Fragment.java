@@ -1,16 +1,20 @@
 
 package org.holoeverywhere.app;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
-import org.holoeverywhere.addon.Sherlock;
-import org.holoeverywhere.addon.Sherlock.SherlockF;
-import org.holoeverywhere.addons.IAddon;
+import org.holoeverywhere.LayoutInflater;
+import org.holoeverywhere.addon.IAddon;
+import org.holoeverywhere.addon.IAddonBasicAttacher;
+import org.holoeverywhere.addon.IAddonFragment;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app._HoloFragment;
+import android.view.View;
+
+import com.actionbarsherlock.view.ActionMode;
+import com.actionbarsherlock.view.ActionMode.Callback;
 
 public class Fragment extends _HoloFragment {
     public static <T extends Fragment> T instantiate(Class<T> clazz) {
@@ -32,11 +36,20 @@ public class Fragment extends _HoloFragment {
         }
     }
 
+    /**
+     * @deprecated Use {@link #instantiate(Class)} instead.
+     *             {@link #instantiate(Context, String)} is sucks, don't use it!
+     */
     @Deprecated
     public static Fragment instantiate(Context context, String fname) {
         return instantiate(context, fname, null);
     }
 
+    /**
+     * @deprecated Use {@link #instantiate(Class, Bundle)} instead.
+     *             {@link #instantiate(Context, String, Bundle)} is sucks, don't
+     *             use it!
+     */
     @SuppressWarnings("unchecked")
     @Deprecated
     public static Fragment instantiate(Context context, String fname, Bundle args) {
@@ -50,47 +63,104 @@ public class Fragment extends _HoloFragment {
         }
     }
 
-    private final List<IAddon<?, ?>> addons = new ArrayList<IAddon<?, ?>>();
+    private final IAddonBasicAttacher<IAddonFragment, Fragment> mAttacher =
+            new IAddonBasicAttacher<IAddonFragment, Fragment>(this);
 
-    public void attachAddon(IAddon<?, ?> addon) {
-        if (!addons.contains(addon)) {
-            addons.add(addon);
+    private LayoutInflater mLayoutInflater;
+
+    @Override
+    public <T extends IAddonFragment> T addon(Class<? extends IAddon> clazz) {
+        return mAttacher.addon(clazz);
+    }
+
+    @Override
+    public void addon(Collection<Class<? extends IAddon>> classes) {
+        mAttacher.addon(classes);
+    }
+
+    @Override
+    public <T extends IAddonFragment> T addon(String classname) {
+        return mAttacher.addon(classname);
+    }
+
+    @Override
+    public LayoutInflater getLayoutInflater() {
+        if (mLayoutInflater == null) {
+            mLayoutInflater = getSupportActivity().getLayoutInflater().
+                    obtainFragmentChildInflater(this);
         }
+        return mLayoutInflater;
     }
 
-    public void detachAddon(IAddon<?, ?> addon) {
-        addons.remove(addon);
+    @Override
+    public boolean isAddonAttached(Class<? extends IAddon> clazz) {
+        return mAttacher.isAddonAttached(clazz);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends IAddon<?, ?>> T findAddon(Class<T> clazz) {
-        for (IAddon<?, ?> addon : addons) {
-            if (addon.getClass().isAssignableFrom(clazz)) {
-                return (T) addon;
+    @Override
+    public void lockAttaching() {
+        mAttacher.lockAttaching();
+    }
+
+    @Override
+    public Collection<Class<? extends IAddon>> obtainAddonsList() {
+        return mAttacher.obtainAddonsList();
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mAttacher.reset();
+        mAttacher.inhert(activity);
+    }
+
+    @Override
+    public void onCreate(final Bundle savedInstanceState) {
+        lockAttaching();
+        performAddonAction(new AddonCallback<IAddonFragment>() {
+            @Override
+            public void justAction(IAddonFragment addon) {
+                addon.onPreCreate(savedInstanceState);
             }
-        }
-        return null;
-    }
-
-    @Deprecated
-    public Activity getSherlockActivity() {
-        return (Activity) getActivity();
-    }
-
-    public <T extends IAddon<?, ?>> T requireAddon(Class<T> clazz) {
-        T t = findAddon(clazz);
-        if (t == null) {
-            try {
-                t = clazz.newInstance();
-                t.addon(this);
-            } catch (Exception e) {
-                e.printStackTrace();
+        });
+        super.onCreate(savedInstanceState);
+        performAddonAction(new AddonCallback<IAddonFragment>() {
+            @Override
+            public void justAction(IAddonFragment addon) {
+                addon.onCreate(savedInstanceState);
             }
-        }
-        return t;
+        });
     }
 
-    public SherlockF requireSherlock() {
-        return requireAddon(Sherlock.class).fragment(this);
+    @Override
+    public void onDestroyView() {
+        performAddonAction(new AddonCallback<IAddonFragment>() {
+            @Override
+            public void justAction(IAddonFragment addon) {
+                addon.onDestroyView();
+            }
+        });
+        super.onDestroyView();
+    }
+
+    @Override
+    public void onViewCreated(final View view, final Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        performAddonAction(new AddonCallback<IAddonFragment>() {
+            @Override
+            public void justAction(IAddonFragment addon) {
+                addon.onViewCreated(view, savedInstanceState);
+            }
+        });
+    }
+
+    @Override
+    public boolean performAddonAction(AddonCallback<IAddonFragment> callback) {
+        return mAttacher.performAddonAction(callback);
+    }
+
+    @Override
+    public ActionMode startActionMode(Callback callback) {
+        return getSupportActivity().startActionMode(callback);
     }
 }

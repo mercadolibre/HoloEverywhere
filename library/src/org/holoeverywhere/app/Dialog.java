@@ -1,31 +1,30 @@
 
 package org.holoeverywhere.app;
 
+import java.util.Map;
+
+import org.holoeverywhere.HoloEverywhere;
 import org.holoeverywhere.LayoutInflater;
 import org.holoeverywhere.R;
+import org.holoeverywhere.internal.WindowDecorView;
+import org.holoeverywhere.util.WeaklyMap;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
-import android.content.res.Configuration;
-import android.content.res.TypedArray;
-import android.os.Build.VERSION;
-import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup.LayoutParams;
 
-import com.actionbarsherlock.internal.view.menu.ContextMenuBuilder;
-import com.actionbarsherlock.internal.view.menu.ContextMenuDecorView;
+import com.actionbarsherlock.internal.view.menu.ContextMenuDecorView.ContextMenuListenersProvider;
 import com.actionbarsherlock.internal.view.menu.ContextMenuItemWrapper;
 import com.actionbarsherlock.internal.view.menu.ContextMenuListener;
 import com.actionbarsherlock.internal.view.menu.ContextMenuWrapper;
 import com.actionbarsherlock.view.ContextMenu;
 import com.actionbarsherlock.view.MenuItem;
 
-public class Dialog extends android.app.Dialog implements ContextMenuListener {
+public class Dialog extends android.app.Dialog implements ContextMenuListener,
+        ContextMenuListenersProvider {
     private static final int checkTheme(Context context, int theme) {
         if (theme >= 0x01000000) {
             return theme;
@@ -37,6 +36,9 @@ public class Dialog extends android.app.Dialog implements ContextMenuListener {
         }
         return R.style.Holo_Theme_Dialog;
     }
+
+    private Map<View, ContextMenuListener> mContextMenuListeners;
+    private WindowDecorView mDecorView;
 
     public Dialog(Context context) {
         this(context, 0);
@@ -50,69 +52,32 @@ public class Dialog extends android.app.Dialog implements ContextMenuListener {
     }
 
     public Dialog(Context context, int theme) {
-        super(context, checkTheme(context, theme));
+        this(context, checkTheme(context, theme), -1);
+        setCancelable(true);
+    }
+
+    private Dialog(Context context, int theme, int fallback) {
+        super(new ContextThemeWrapperPlus(context, theme), theme);
     }
 
     @Override
     public void addContentView(View view, LayoutParams params) {
-        super.addContentView(prepareDecorView(view), params);
-    }
-
-    private void checkWindowSizes() {
-        View view = findViewById(R.id.custom);
-        if (view == null) {
-            view = getWindow().getDecorView();
-        }
-        if (VERSION.SDK_INT < 11 && view != null) {
-            DisplayMetrics dm = getContext().getResources().getDisplayMetrics();
-            TypedArray a = getContext().obtainStyledAttributes(R.styleable.HoloActivity);
-            final int windowMinWidthMajor = (int) a.getFraction(
-                    R.styleable.HoloActivity_windowMinWidthMajor, dm.widthPixels, 1, 0);
-            final int windowMinWidthMinor = (int) a.getFraction(
-                    R.styleable.HoloActivity_windowMinWidthMinor, dm.widthPixels, 1, 0);
-            a.recycle();
-            final int orientation;
-            if (getContext() instanceof Activity) {
-                orientation = ((Activity) getContext()).getRequestedOrientation();
-                switch (orientation) {
-                    case ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE:
-                    case ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE:
-                        view.setMinimumWidth(windowMinWidthMajor);
-                        break;
-                    case ActivityInfo.SCREEN_ORIENTATION_PORTRAIT:
-                    case ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT:
-                        view.setMinimumWidth(windowMinWidthMinor);
-                        break;
-                }
-            } else {
-                orientation = getContext().getResources().getConfiguration().orientation;
-                switch (orientation) {
-                    case Configuration.ORIENTATION_LANDSCAPE:
-                        view.setMinimumWidth(windowMinWidthMajor);
-                        break;
-                    case Configuration.ORIENTATION_PORTRAIT:
-                        view.setMinimumWidth(windowMinWidthMinor);
-                        break;
-                }
-            }
+        if (requestDecorView(view, params, -1)) {
+            mDecorView.addView(view, params);
         }
     }
 
     @Override
-    public void createContextMenu(ContextMenuBuilder contextMenuBuilder,
-            View view, ContextMenuInfo menuInfo, ContextMenuListener listener) {
-        listener.onCreateContextMenu(contextMenuBuilder, view, menuInfo);
+    public ContextMenuListener getContextMenuListener(View view) {
+        if (mContextMenuListeners == null) {
+            return null;
+        }
+        return mContextMenuListeners.get(view);
     }
 
     @Override
     public LayoutInflater getLayoutInflater() {
         return LayoutInflater.from(getContext());
-    }
-
-    @Override
-    public void onContentChanged() {
-        super.onContentChanged();
-        checkWindowSizes();
     }
 
     @Override
@@ -161,22 +126,74 @@ public class Dialog extends android.app.Dialog implements ContextMenuListener {
         }
     }
 
-    public View prepareDecorView(View v) {
-        return ContextMenuDecorView.prepareDecorView(getContext(), v, this, 0);
+    @Override
+    public void registerForContextMenu(View view) {
+        if (HoloEverywhere.WRAP_TO_NATIVE_CONTEXT_MENU) {
+            super.registerForContextMenu(view);
+        } else {
+            registerForContextMenu(view, this);
+        }
+    }
+
+    public void registerForContextMenu(View view, ContextMenuListener listener) {
+        if (mContextMenuListeners == null) {
+            mContextMenuListeners = new WeaklyMap<View, ContextMenuListener>();
+        }
+        mContextMenuListeners.put(view, listener);
+    }
+
+    private boolean requestDecorView(View view, LayoutParams params, int layoutRes) {
+        if (mDecorView != null) {
+            return true;
+        }
+        mDecorView = new WindowDecorView(getContext());
+        mDecorView.setId(android.R.id.content);
+        mDecorView.setProvider(this);
+        if (view != null) {
+            mDecorView.addView(view, params);
+        } else if (layoutRes > 0) {
+            getLayoutInflater().inflate(layoutRes, mDecorView, true);
+        }
+        getWindow().setContentView(mDecorView, new LayoutParams(
+                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        return false;
+    }
+
+    @Override
+    public void setCancelable(boolean flag) {
+        super.setCancelable(flag);
+        setCanceledOnTouchOutside(flag);
     }
 
     @Override
     public void setContentView(int layoutResID) {
-        setContentView(getLayoutInflater().inflate(layoutResID));
+        if (requestDecorView(null, null, layoutResID)) {
+            mDecorView.removeAllViewsInLayout();
+            getLayoutInflater().inflate(layoutResID, mDecorView, true);
+        }
     }
 
     @Override
     public void setContentView(View view) {
-        super.setContentView(prepareDecorView(view));
+        setContentView(view, new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
     }
 
     @Override
     public void setContentView(View view, LayoutParams params) {
-        super.setContentView(prepareDecorView(view), params);
+        if (requestDecorView(view, params, -1)) {
+            mDecorView.removeAllViewsInLayout();
+            mDecorView.addView(view, params);
+        }
+    }
+
+    @Override
+    public void unregisterForContextMenu(View view) {
+        if (HoloEverywhere.WRAP_TO_NATIVE_CONTEXT_MENU) {
+            super.unregisterForContextMenu(view);
+        } else {
+            if (mContextMenuListeners != null) {
+                mContextMenuListeners.remove(view);
+            }
+        }
     }
 }
